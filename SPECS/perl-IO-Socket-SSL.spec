@@ -7,7 +7,7 @@
 
 Name:		perl-IO-Socket-SSL
 Version:	2.073
-Release:	1%{?dist}
+Release:	2%{?dist}
 Summary:	Perl library for transparent SSL
 License:	(GPL+ or Artistic) and MPLv2.0
 URL:		https://metacpan.org/release/IO-Socket-SSL
@@ -18,6 +18,7 @@ Patch1:		IO-Socket-SSL-2.068-use-system-default-SSL-version.patch
 # bug #1632660, requires openssl tool
 Patch2:		IO-Socket-SSL-2.066-Test-client-performs-Post-Handshake-Authentication.patch
 Patch3:		IO-Socket-SSL-2.068-openssl-1.1.1e.patch
+Patch4:		IO-Socket-SSL-2.085-Fixed-test-fail-with-OpenSSL-3.2.patch
 BuildArch:	noarch
 # Module Build
 BuildRequires:	coreutils
@@ -86,18 +87,21 @@ mod_perl.
 
 # Allow building with OpenSSL 1.1.1e as the Fedora package has the
 # problematic EOF handling change reverted
-%patch3
+%patch -P3
 
 # Use system-wide default cipher list to support use of system-wide
 # crypto policy (#1076390, #1127577, CPAN RT#97816)
 # https://fedoraproject.org/wiki/Changes/CryptoPolicy
-%patch0
+%patch -P0
 
 # Use system-default SSL version too
-%patch1
+%patch -P1
 
 # Add a test for PHA
-%patch2 -p1
+%patch -P2 -p1
+
+# Fixed test fail with OpenSSL 3.2
+%patch -P4 -p1
 
 %build
 NO_NETWORK_TESTING=1 perl Makefile.PL \
@@ -131,6 +135,9 @@ make test
 %{_mandir}/man3/IO::Socket::SSL::PublicSuffix.3*
 
 %changelog
+* Wed Jun 19 2024 Jitka Plesnikova <jplesnik@redhat.com> - 2.073-2
+- Resolves: RHEL-40746 - Fixed test fail with OpenSSL 3.2
+
 * Tue Jan 04 2022 Michal Josef Špaček <mspacek@redhat.com> - 2.073-1
 - Update to 2.073, which has official support for OpenSSL 3.0.0
   Related: rhbz#1968046
